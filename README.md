@@ -1,51 +1,77 @@
 # NTWPlotter CLI
 
-A terminal-based network diagnostics tool inspired by PingPlotter. Monitor and analyze your network performance with live graphs directly in your terminal.
+Uma ferramenta de diagnóstico de rede baseada em terminal, inspirada no PingPlotter. Monitore e analise o desempenho da sua rede com gráficos ao vivo diretamente no seu terminal.
 
 ## Features
 
-- Ping hosts to measure network latency and packet loss
-- Perform traceroute to identify network path and bottlenecks
-- Live terminal-based graphs with color-coded performance indicators
-- Detailed statistics on network performance metrics
-- Save results to CSV files for further analysis
-- Lightweight and easy to use
+- Ping para hosts para medir latência e perda de pacotes na rede
+- Execução de traceroute para identificar o caminho da rede e gargalos
+- Gráficos ao vivo no terminal com indicadores de desempenho codificados por cores
+- Estatísticas detalhadas sobre métricas de desempenho de rede
+- Salve resultados em arquivos CSV para análise posterior
+- Leve e fácil de usar
 
-## Installation
+## Instalação
 
 ```bash
-# Clone the repository
+# Clone o repositório
 git clone https://github.com/yourusername/ntwplotter.git
 cd ntwplotter
 
-# Set up a virtual environment
+# Configure um ambiente virtual
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install the package
+# Instale os pacotes
 pip install -e .
 ```
 
-## Usage
-* Simple ping monitoring to a host
-ntwplot google.com
+## Uso
+### Monitoramento simples de ping para um host
+`ntwplot google.com`
 
-### Monitor for a specific number of pings
-ntwplot google.com --count 100
+### Monitorar por um número específico de pings
+`ntwplot google.com --count 100`
 
-### Change the interval between pings (in seconds)
-ntwplot google.com --interval 0.5
+### Alterar o intervalo entre pings (em segundos)
+`ntwplot google.com --interval 0.5`
 
-### Disable the initial traceroute
-ntwplot google.com --no-traceroute
+### Desativar o traceroute inicial
+`ntwplot google.com --no-traceroute`
 
-### Save results to a CSV file
-ntwplot google.com --save results.csv
+### Salvar resultados em um arquivo CSV
+`ntwplot google.com --save results.csv`
 
-Command Options:
-* `TARGET`: The hostname or IP address to monitor (required)
-* `--count`, -c: Number of pings to send (default: 0 for continuous)
-* `--interval`, -i: Seconds between pings (default: 1.0)
-* `--traceroute/--no-traceroute`: Enable/disable traceroute (default: enabled)
-* `--save, -s`: Save results to specified file
+### Opções de Comando: 
+- `TARGET`: O nome do host ou endereço IP a ser monitorado (obrigatório)
+- `--count`, -c: Número de pings a serem enviados (padrão: 0 para contínuo)
+- `--interval`, -i:  Segundos entre pings (padrão: 1.0)
+- `--traceroute/--no-traceroute`: Ativar/desativar traceroute (padrão: ativado)
+- `--save, -s`: Salvar resultados no arquivo especificado
 
+## Interpretando os Gráficos do NTWPlotter
+### Gráfico de Latência
+O gráfico principal exibe a latência de rede ao longo do tempo:
+
+- Eixo Y: Tempo de resposta em milissegundos (ms)
+- Eixo X: Sequência de pings ao longo do tempo
+- Linha do gráfico: Mostra a tendência da latência
+
+### Interpretação de Padrões
+- Linha estável e baixa: Conexão saudável
+- Picos ocasionais: Possível congestionamento temporário
+- Picos frequentes: Instabilidade na rede
+- Valores constantemente altos: Possível gargalo na conexão
+- Lacunas na linha: Pacotes perdidos (packet loss)
+
+### Informações do Traceroute
+Se o traceroute estiver ativado, você verá:
+- Hops da rede: Cada servidor/roteador no caminho até o destino
+- Latência por hop: Identifica onde ocorrem atrasos no caminho da rede
+
+### Estatísticas Úteis
+- Mínimo/Máximo/Média: Valores extremos e médios de latência
+- Desvio padrão: Indica a estabilidade da conexão (valor menor = mais estável)
+- Packet loss: Porcentagem de pacotes perdidos durante o teste
+
+Ao analisar os dados, procure padrões consistentes que possam indicar problemas específicos na sua conexão ou na infraestrutura de rede.
