@@ -13,7 +13,7 @@ def save_results(results, route=None, filename=None):
     if not filename:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         host = results[0]['host'] if results else "unknown"
-        filename = f"pingplot_{host}_{timestamp}.csv"
+        filename = f"ntwplot_{host}_{timestamp}.csv"
     
     # Determine file type based on extension
     if filename.endswith('.json'):

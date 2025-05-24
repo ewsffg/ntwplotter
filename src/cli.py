@@ -13,8 +13,8 @@ from .data.storage import save_results
 @click.option('--traceroute/--no-traceroute', default=True, help='Perform traceroute at start')
 @click.option('--save', '-s', help='Save results to file')
 def main(target, count, interval, traceroute, save):
-    """A simple terminal-based PingPlotter clone."""
-    click.echo(f"Starting pingplot for {target}")
+    """A simple terminal-based NTWPlotter clone."""
+    click.echo(f"Starting ntwplot for {target}")
     click.echo("Press Ctrl+C to exit")
     
     # Store results
