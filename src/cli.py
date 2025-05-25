@@ -4,8 +4,9 @@ import threading
 from .network.ping import ping_host
 from .network.traceroute import trace_route
 from .visualization.terminal_graph import display_graph
-from .data.storage import save_results
+from .data.storage import save_results, save_internet_status
 from .network.internet_check import check_internet_connectivity
+from datetime import datetime
 
 @click.command()
 @click.argument('target', type=str)
