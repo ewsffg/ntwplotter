@@ -1,6 +1,7 @@
 import plotext as plt
 import time
 import os
+import shutil
 from datetime import datetime
 
 def display_graph(results, route=None, max_points=60, internet_status=None):
@@ -14,6 +15,9 @@ def display_graph(results, route=None, max_points=60, internet_status=None):
     """
     # Clear terminal
     os.system('cls' if os.name == 'nt' else 'clear')
+    
+    # Get terminal size
+    terminal_width, terminal_height = shutil.get_terminal_size()
     
     # Extract data
     times = [r['timestamp'] for r in results[-max_points:]]
@@ -32,43 +36,78 @@ def display_graph(results, route=None, max_points=60, internet_status=None):
     max_rtt = max(rtts) if rtts else 0
     avg_rtt = sum(rtts) / len(rtts) if rtts else 0
     
-    # Plot RTT
+    # Determine optimal graph size based on terminal
+    graph_width = terminal_width // 2 - 5  # Adjust for padding
+    graph_height = min(15, terminal_height // 3)  # Use at most 1/3 of height
+    
+    # Configure RTT graph
     plt.clf()
+    plt.plot_size(graph_width, graph_height)
     plt.plot(relative_times, rtts, color="red", marker="dot")
-    plt.title(f"Ping Response Time to {results[0]['host'] if results else 'target'}")
+    plt.title(f"RTT (ms) - Min: {min_rtt:.1f}, Max: {max_rtt:.1f}, Avg: {avg_rtt:.1f}")
     plt.xlabel("Seconds")
     plt.ylabel("RTT (ms)")
+
+    # Garanta que os limites nunca são iguais (evita divisão por zero)
+    x_min = min(relative_times) if relative_times else 0
+    x_max = max(relative_times) if relative_times else 10
+    if x_min == x_max:
+        x_max = x_min + 1  # Adiciona 1 segundo se os limites forem iguais
+
+    plt.xlim(x_min, x_max)
+    plt.ylim(0, max(0.1, max_rtt * 1.1))  # Garante valor mínimo de 0.1
+
+    # Display RTT graph
+    rtt_canvas = plt.build()
     
-    # Add statistics as title annotation instead of using text()
-    plt.title(f"Ping Response Time to {results[0]['host'] if results else 'target'}\nMin: {min_rtt:.2f} ms, Max: {max_rtt:.2f} ms, Avg: {avg_rtt:.2f} ms")
-    plt.show()
+    # Configure packet loss graph
+    plt.clf()
+    plt.plot_size(graph_width, graph_height)
+    plt.plot(relative_times, packet_loss, color="yellow", marker="dot")
+    plt.title("Packet Loss (%)")
+    plt.xlabel("Seconds")
+    plt.ylabel("Loss (%)")
+
+    # Mesma proteção contra limites iguais
+    plt.xlim(x_min, x_max)
+    plt.ylim(0, max(0.1, max(packet_loss) * 1.1 if any(packet_loss) else 10))
+
+    # Display packet loss graph
+    loss_canvas = plt.build()
     
-    # Display packet loss as a separate graph if needed
-    if any(p > 0 for p in packet_loss):
-        plt.clf()
-        plt.plot(relative_times, packet_loss, color="yellow", marker="dot")
-        plt.title("Packet Loss (%)")
-        plt.xlabel("Seconds")
-        plt.ylabel("Loss (%)")
-        plt.show()
+    # Split the RTT and packet loss canvases into lines
+    rtt_lines = rtt_canvas.split('\n')
+    loss_lines = loss_canvas.split('\n')
+    
+    # Print the graphs side by side
+    for i in range(min(len(rtt_lines), len(loss_lines))):
+        print(rtt_lines[i] + "    " + loss_lines[i])
     
     # Display statistics
     if results:
         latest = results[-1]
         print(f"\nLatest ping to {latest['host']} at {datetime.fromtimestamp(latest['timestamp']).strftime('%H:%M:%S')}:")
-        print(f"Min RTT: {latest['min_rtt']:.2f} ms")
-        print(f"Avg RTT: {latest['avg_rtt']:.2f} ms")
-        print(f"Max RTT: {latest['max_rtt']:.2f} ms")
-        print(f"Packet Loss: {latest['packet_loss']:.1f}%")
-        print(f"Jitter: {latest['jitter']:.2f} ms")
-        print(f"Status: {'✓ Alive' if latest['is_alive'] else '✗ Down'}")
+        print(f"Min RTT: {latest['min_rtt']:.2f} ms | Avg RTT: {latest['avg_rtt']:.2f} ms | Max RTT: {latest['max_rtt']:.2f} ms")
+        print(f"Packet Loss: {latest['packet_loss']:.1f}% | Jitter: {latest['jitter']:.2f} ms | Status: {'✓ Alive' if latest['is_alive'] else '✗ Down'}")
     
     # Display route information if available
     if route:
         print("\nNetwork path:")
+        route_info = []
         for i, hop in enumerate(route):
             status = "✓" if hop['is_alive'] else "✗"
-            print(f"{i+1}. {status} {hop['address']} - {hop['avg_rtt']:.2f} ms")
+            route_info.append(f"{i+1}. {status} {hop['address']} - {hop['avg_rtt']:.2f} ms")
+        
+        # Display route in columns if terminal is wide enough
+        if terminal_width >= 100:
+            mid = (len(route_info) + 1) // 2
+            for i in range(mid):
+                left = route_info[i]
+                right = route_info[i + mid] if i + mid < len(route_info) else ""
+                print(f"{left:<40} {right}")
+        else:
+            for info in route_info:
+                print(info)
     
     # Display internet status if available
     if internet_status:
@@ -80,7 +119,6 @@ def display_graph(results, route=None, max_points=60, internet_status=None):
         
         # If disconnected, show when it was last connected
         if not current_status['is_connected']:
-            # Find the last record where it was connected
             for status in reversed(internet_status[:-1]):
                 if status['is_connected']:
                     disconnect_time = datetime.fromtimestamp(current_status['timestamp']).strftime('%H:%M:%S')
