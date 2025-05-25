@@ -42,12 +42,20 @@ pip install -e .
 ### Salvar resultados em um arquivo CSV
 `ntwplot google.com --save results.csv`
 
+### Desativar a verificação de conectividade de internet
+`ntwplot google.com --no-check-internet`
+
+### Alterar o intervalo de verificação de internet (em segundos)
+`ntwplot google.com --internet-check-interval 60`
+
 ### Opções de Comando: 
 - `TARGET`: O nome do host ou endereço IP a ser monitorado (obrigatório)
 - `--count`, -c: Número de pings a serem enviados (padrão: 0 para contínuo)
 - `--interval`, -i:  Segundos entre pings (padrão: 1.0)
 - `--traceroute/--no-traceroute`: Ativar/desativar traceroute (padrão: ativado)
-- `--save, -s`: Salvar resultados no arquivo especificado
+- `--save`, -s: Salvar resultados no arquivo especificado
+- `--check-internet/--no-check-internet`: Ativar/desativar monitoramento de conectividade de internet (padrão: ativado)
+- `--internet-check-interval`: Segundos entre verificações de internet (padrão: 30.0)
 
 ## Interpretando os Gráficos do NTWPlotter
 ### Gráfico de Latência
@@ -57,21 +65,14 @@ O gráfico principal exibe a latência de rede ao longo do tempo:
 - Eixo X: Sequência de pings ao longo do tempo
 - Linha do gráfico: Mostra a tendência da latência
 
-### Interpretação de Padrões
-- Linha estável e baixa: Conexão saudável
-- Picos ocasionais: Possível congestionamento temporário
-- Picos frequentes: Instabilidade na rede
-- Valores constantemente altos: Possível gargalo na conexão
-- Lacunas na linha: Pacotes perdidos (packet loss)
+### Monitoramento de Conectividade de Internet
+O NTWPlotter verifica periodicamente se sua conexão com a internet está ativa, independentemente do host alvo sendo monitorado:
 
-### Informações do Traceroute
-Se o traceroute estiver ativado, você verá:
-- Hops da rede: Cada servidor/roteador no caminho até o destino
-- Latência por hop: Identifica onde ocorrem atrasos no caminho da rede
+- Exibe notificações quando sua internet cai ou é restaurada
+- Registra os momentos exatos de perda e restauração de conexão
+- Salva os registros em um arquivo CSV separado quando a opção `--save` é utilizada
+- Permite distinguir entre falhas no host alvo e problemas na sua própria conexão
 
-### Estatísticas Úteis
-- Mínimo/Máximo/Média: Valores extremos e médios de latência
-- Desvio padrão: Indica a estabilidade da conexão (valor menor = mais estável)
-- Packet loss: Porcentagem de pacotes perdidos durante o teste
-
-Ao analisar os dados, procure padrões consistentes que possam indicar problemas específicos na sua conexão ou na infraestrutura de rede.
+Quando a opção `--save` é utilizada, dois arquivos são gerados:
+- `arquivo.csv`: Contém os dados de ping para o host alvo
+- `arquivo_internet.csv`: Contém os registros de status da conexão com a internet
