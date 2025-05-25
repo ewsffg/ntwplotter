@@ -71,3 +71,31 @@ def save_csv(results, route, filename):
                     hop['packet_loss'],
                     hop['is_alive']
                 ])
+
+def save_internet_status(status_records, filename):
+    """Salva registros de status da internet em um arquivo CSV.
+    
+    Args:
+        status_records: Lista com registros de status da internet
+        filename: Nome do arquivo para salvar os registros
+    """
+    # Certifique-se que o nome do arquivo termine com _internet.csv
+    if not filename.endswith('_internet.csv'):
+        if filename.endswith('.csv'):
+            filename = filename.replace('.csv', '_internet.csv')
+        else:
+            filename += '_internet.csv'
+    
+    with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['timestamp', 'is_connected', 'host_checked', 'rtt'])
+        
+        for record in status_records:
+            writer.writerow([
+                datetime.fromtimestamp(record['timestamp']).strftime('%Y-%m-%d %H:%M:%S'),
+                record['is_connected'],
+                record['host_checked'] if record['host_checked'] else 'none',
+                record['rtt']
+            ])
+    
+    return filename

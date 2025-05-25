@@ -3,13 +3,14 @@ import time
 import os
 from datetime import datetime
 
-def display_graph(results, route=None, max_points=60):
+def display_graph(results, route=None, max_points=60, internet_status=None):
     """Display a terminal-based graph of ping results.
     
     Args:
         results: List of ping result dictionaries
         route: List of traceroute hop dictionaries
         max_points: Maximum number of points to show on the graph
+        internet_status: List of internet connection status dictionaries
     """
     # Clear terminal
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -68,3 +69,21 @@ def display_graph(results, route=None, max_points=60):
         for i, hop in enumerate(route):
             status = "✓" if hop['is_alive'] else "✗"
             print(f"{i+1}. {status} {hop['address']} - {hop['avg_rtt']:.2f} ms")
+    
+    # Display internet status if available
+    if internet_status:
+        current_status = internet_status[-1]
+        print("\nStatus da Internet:")
+        status_text = "✓ Conectado" if current_status['is_connected'] else "✗ Desconectado"
+        status_time = datetime.fromtimestamp(current_status['timestamp']).strftime('%H:%M:%S')
+        print(f"Estado atual: {status_text} (última verificação: {status_time})")
+        
+        # If disconnected, show when it was last connected
+        if not current_status['is_connected']:
+            # Find the last record where it was connected
+            for status in reversed(internet_status[:-1]):
+                if status['is_connected']:
+                    disconnect_time = datetime.fromtimestamp(current_status['timestamp']).strftime('%H:%M:%S')
+                    last_connected = datetime.fromtimestamp(status['timestamp']).strftime('%H:%M:%S')
+                    print(f"Desconectado desde: {disconnect_time} (última conexão: {last_connected})")
+                    break
